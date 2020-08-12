@@ -9,9 +9,7 @@ import {
 import { Clients } from './clients';
 import { analytics } from './handlers/analytics';
 import { updateLiveUsers } from './event/liveUsersUpdate';
-
-const TREE_SECONDS_MS = 3 * 1000;
-const CONCURRENCY = 10;
+import { productList } from '../node/resolvers/products';
 
 // Create a LRU memory cache for the Status client.
 // The @vtex/api HttpClient respects Cache-Control headers and uses the provided cache.
@@ -20,13 +18,19 @@ metrics.trackCache('status', memoryCache);
 
 declare global {
   type Context = ServiceContext<Clients, State>
-
+  
   interface State extends RecorderState {
     code: number
   }
 }
 
+const TREE_SECONDS_MS = 3 * 1000;
+const CONCURRENCY = 10;
+
 export default new Service<Clients, State, ParamsContext>({
+  events: {
+    liveUsersUpdate: updateLiveUsers,
+  },
   clients: {
     implementation: Clients,
     options: {
@@ -44,12 +48,16 @@ export default new Service<Clients, State, ParamsContext>({
       },
     },
   },
-  events: {
-    liveUsersUpdate: updateLiveUsers,
-  },
   routes: {
     analytics: method({
       GET: [analytics],
     }),
   },
+  graphql: {
+    resolvers: {
+      Query: {
+        productList,
+      }
+    }
+  }
 });
