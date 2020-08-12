@@ -35,7 +35,6 @@ export default new Service<Clients, State, ParamsContext>({
         timeout: 10000,
       },
       events: {
-        liveUsersUpdate: updateLiveUsers,
         exponentialTimeoutCoefficient: 2,
         exponentialBackoffCoefficient: 2,
         initialBackoffDelay: 50,
@@ -44,6 +43,9 @@ export default new Service<Clients, State, ParamsContext>({
         concurrency: CONCURRENCY,
       },
     },
+  },
+  events: {
+    liveUsersUpdate: updateLiveUsers,
   },
   routes: {
     analytics: method({
